@@ -1,15 +1,21 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using MongoDbTutorial.Services;
+using System.Collections.Concurrent;
 
 namespace MongoDbTutorial.Hubs
 {
     public class ChatHub : Hub
     {
-        private readonly ChatService _chatService;
+        private readonly PushSubscriptionService _pushService;
+        private readonly PushService _pushNotifier;
+        private readonly ChatService _chatService;        
+        private static readonly ConcurrentDictionary<string, string> ConnectedUsers = new();
 
-        public ChatHub(ChatService chatService)
+        public ChatHub(ChatService chatService, PushSubscriptionService pushService, PushService pushNotifier)
         {
             _chatService = chatService;
+            _pushService = pushService;
+            _pushNotifier = pushNotifier;
         }
         public async Task SendMessage(string fromUserId, string toUserId, string message, bool? oneTime)
         {
@@ -19,11 +25,30 @@ namespace MongoDbTutorial.Hubs
 
             var unread = _chatService.GetUnreadCount(toUserId);
             await Clients.User(toUserId).SendAsync("UnreadCount", unread);
+
+            var userIsConnected = IsUserConnected(toUserId);
+            if (!userIsConnected)
+            {
+                var subscriptions = await _pushService.GetAllUserSubscriptionsAsync(toUserId);
+                foreach (var sub in subscriptions)
+                {
+                    _pushNotifier.SendPushNotification(sub, message);
+                }
+            }
         }
 
         public override Task OnConnectedAsync()
         {
+            var userId = Context.UserIdentifier;
+            ConnectedUsers[userId] = Context.ConnectionId;
             return base.OnConnectedAsync();
+        }
+
+        public override Task OnDisconnectedAsync(Exception? exception)
+        {
+            var userId = Context.UserIdentifier;
+            ConnectedUsers.TryRemove(userId, out _);
+            return base.OnDisconnectedAsync(exception);
         }
 
         public Task Register(string userId)
@@ -53,6 +78,7 @@ namespace MongoDbTutorial.Hubs
             var fromUserId = Context.UserIdentifier;
             await Clients.User(toUserId).SendAsync("UserTyping", fromUserId, false);
         }
+        private bool IsUserConnected(string userId) => ConnectedUsers.ContainsKey(userId);
     }
     public class CustomUserIdProvider : IUserIdProvider
     {

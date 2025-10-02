@@ -1,6 +1,6 @@
 ﻿// Chat Application Main Class
 class ChatApplication {
-    constructor() {
+    constructor(vapidPublicKey) {
         this.userId = document.querySelector('.chat-app')?.getAttribute('data-user-id') || '1';
         this.username = document.querySelector('.chat-app')?.getAttribute('data-username') || 'John Doe';
         this.selectedUserId = null;
@@ -10,6 +10,7 @@ class ChatApplication {
         this.onlineUsers = 3;
         this.isAutoScrolling = true;
         this.connection = null;
+        this.vapidPublicKey = vapidPublicKey;
 
         this.init();
     }
@@ -23,6 +24,8 @@ class ChatApplication {
 
         // Update header with username
         document.getElementById('header-username').textContent = this.username;
+
+        this.registerPush(this.userId);
     }
 
     setupSignalR() {
@@ -412,10 +415,60 @@ class ChatApplication {
             Notification.requestPermission();
         }
     }
+
+    async registerPush(userId) {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+        try {
+            // Register Service Worker
+            const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+            console.log('SW registered', reg);
+
+            // Optional: unsubscribe old
+            let sub = await reg.pushManager.getSubscription();
+            if (sub) {
+                await sub.unsubscribe();
+                console.log('Old subscription unsubscribed');
+            }
+            // Subscribe with VAPID key
+            const applicationServerKey = this.urlBase64ToUint8Array(this.vapidPublicKey);
+            sub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey
+            });
+
+            const subJson = sub.toJSON();
+
+            // Send subscription to server
+            await fetch('/PushSubscription/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: this.userId,
+                    endpoint: subJson.endpoint,
+                    p256dh: subJson.keys.p256dh,
+                    auth: subJson.keys.auth
+                })
+            });
+
+            console.log('Push subscription registered');
+        } catch (err) {
+            console.error('Push registration error:', err);
+        }
+    }
+
+    urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = atob(base64);
+        return new Uint8Array([...rawData].map(c => c.charCodeAt(0)));
+    }
+
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    window.chatApp = new ChatApplication();
+    const vapidPublicKey = 'BCuxfTxtbORt1GqvRvfvt994raDxJOPHLDOeeQFfaOGdhl1mj4zYIymUSUcN8lvSP_Yw2-PhSRXrjg0LTdAIyl4';
+    window.chatApp = new ChatApplication(vapidPublicKey);
 });
 
 document.querySelectorAll('.user-item').forEach(item => {

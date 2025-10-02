@@ -4,15 +4,21 @@ using MongoDB.Driver;
 using MongoDbTutorial.Hubs;
 using MongoDbTutorial.Models;
 using MongoDbTutorial.Services;
+using WebPush;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var mongoDbSettings = builder.Configuration.GetSection("MongoDBSettings").Get<MongoDbSettings>();
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDBSettings"));
 
+//var keys = VapidHelper.GenerateVapidKeys();
+//Console.WriteLine("Public Key: " + keys.PublicKey);
+//Console.WriteLine("Private Key: " + keys.PrivateKey);
 // Services
 builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<ChatService>();
+builder.Services.AddSingleton<PushSubscriptionService>();
+builder.Services.AddSingleton<PushService>();
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
 builder.Services.AddSingleton<IMongoClient>(sp =>
