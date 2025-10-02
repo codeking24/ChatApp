@@ -1,244 +1,169 @@
 ﻿@{
-    var userId = ViewBag.UserId;
-    var username = ViewBag.Username;
-    var users = ViewBag.Users as IEnumerable<MongoDbTutorial.Models.Users.User>;
+    ViewBag.Title = "Chat";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>ChatApp</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
-    <style>
-        .chat-app {
-            height: 90vh;
-            display: flex;
-            border: 1px solid #ccc;
-        }
+<div class="chat-app" data-user-id="@ViewBag.UserId" data-username="@ViewBag.Username">
 
-        .chat-users {
-            width: 25%;
-            border-right: 1px solid #ddd;
-            overflow-y: auto;
-        }
+    <div class="chat-users">
+        <div class="users-header">
+            <h5><i class="fas fa-users me-2"></i>Contacts</h5>
+            <span class="badge bg-light text-dark" id="online-users"></span>
+        </div>
 
-            .chat-users .list-group-item.active {
-                background-color: #0d6efd;
-                color: #fff;
-            }
-
-        .chat-window {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #chatWindow {
-            flex-grow: 1;
-            padding: 15px;
-            background: #f8f9fa;
-            overflow-y: auto;
-        }
-
-        .message-bubble {
-            max-width: 60%;
-            padding: 8px 12px;
-            margin: 5px;
-            border-radius: 18px;
-            font-size: 14px;
-            line-height: 1.3;
-            display: inline-block;
-            clear: both;
-            position: relative;
-        }
-
-            .message-bubble.own {
-                background: #d9fdd3; /* WhatsApp green */
-                float: right;
-                border-bottom-right-radius: 4px;
-            }
-
-            .message-bubble.other {
-                background: #fff;
-                float: left;
-                border: 1px solid #ccc;
-                border-bottom-left-radius: 4px;
-            }
-
-        .message-time {
-            font-size: 11px;
-            color: gray;
-            margin-left: 5px;
-        }
-
-        .typing-indicator {
-            font-style: italic;
-            color: gray;
-            font-size: 0.9em;
-            margin: 5px 0;
-        }
-    </style>
-</head>
-<body>
-    <div class="container-fluid">
-        <nav class="navbar navbar-light bg-light mb-2">
-            <span class="navbar-brand">ChatApp - @username</span>
-            <a class="btn btn-outline-danger" href="/Account/Logout">Logout</a>
-        </nav>
-
-        <div class="chat-app">
-            <!-- Users list -->
-            <div class="chat-users">
-                <ul class="list-group list-group-flush" id="userList">
-                    @foreach (var user in users)
-                    {
-                        <li class="list-group-item user-item d-flex justify-content-between align-items-center" data-user-id="@user.Id">
-                            <span>@user.Username</span>
-                            <span class="badge bg-danger unread-count" id="unread-@user.Id" style="display:none;">0</span>
-                        </li>
-                    }
-                </ul>
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="userSearch" placeholder="Search contacts...">
+                <i class="fas fa-search"></i>
             </div>
+        </div>
 
-            <!-- Chat Window -->
-            <div class="chat-window">
-                <div id="chatHeader" class="p-2 border-bottom bg-light fw-bold">
-                    Select a user
-                </div>
-                <div id="chatWindow">
-                    <p class="text-muted">No conversation selected.</p>
-                </div>
-                <div id="typingIndicator" class="typing-indicator px-3" style="display:none;">
-                    User is typing...
-                </div>
-                <div class="chat-input border-top p-2">
-                    <div class="input-group">
-                        <input type="text" id="messageInput" class="form-control" placeholder="Type a message..." />
-                        <button id="sendBtn" class="btn btn-primary">Send</button>
-                        <button id="sendOneTimeBtn" class="btn btn-primary">1</button>
+        <div class="users-list" id="usersList">
+            @foreach (var user in ViewBag.Users)
+            {
+                <div class="user-item d-flex align-items-center" data-user-id="@user.Id">
+                    <div class="user-avatar me-2">
+                        <i class="fas fa-user"></i>
                     </div>
+                    <div class="user-info flex-grow-1">
+                        <div class="user-name">@user.Username</div>
+                    </div>
+                    <span class="badge bg-danger ms-2" id="unread-@user.Id" style="display:none;">0</span>
                 </div>
+            }
+        </div>
+    </div>
+    <div class="chat-window">
+        <!-- Chat Header -->
+        <div class="chat-header">
+            <div class="chat-user-info">
+                <div class="chat-user-avatar" id="chatUserAvatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <div id="chatHeaderUsername">Select a contact</div>
+                    <small class="text-muted" id="userStatus">Click on a contact to start chatting</small>
+                </div>
+            </div>
+            <div class="chat-actions">
+                <button title="Voice call" id="voiceCallBtn" disabled>
+                    <i class="fas fa-phone"></i>
+                </button>
+                <button title="Video call" id="videoCallBtn" disabled>
+                    <i class="fas fa-video"></i>
+                </button>
+                <button title="More options" id="moreOptionsBtn" disabled>
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Messages Container -->
+        <div class="messages-container" id="messagesContainer">
+            <div class="welcome-message">
+                <div class="welcome-icon">
+                    <i class="fas fa-comments fa-4x text-muted mb-3"></i>
+                </div>
+                <h4 class="text-muted">Welcome to ChatApp</h4>
+                <p class="text-muted">Select a contact from the list to start messaging</p>
+            </div>
+        </div>
+
+        <!-- Auto-scroll indicator -->
+        <div class="auto-scroll-indicator" id="autoScrollIndicator" title="Scroll to bottom">
+            <i class="fas fa-arrow-down"></i>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <span id="typingUser">Someone</span> is typing...
+        </div>
+
+        <!-- Chat Input -->
+        <div class="chat-input-container">
+            <div class="input-actions">
+                <button class="btn btn-sm btn-outline-secondary" title="Emoji" id="emojiBtn">
+                    <i class="fas fa-smile"></i>
+                </button>
+            </div>
+            <div id="emojiPicker" class="emoji-picker" style="display:none;"></div>
+            <textarea class="message-input" id="messageInput" placeholder="Type a message..." rows="1" disabled></textarea>
+            <div class="send-buttons">
+                <button class="send-btn" title="Send one-time message" id="sendOneTimeBtn" disabled>
+                    <i class="fas fa-stopwatch"></i>
+                </button>
+                <button class="send-btn" title="Send message" id="sendBtn" disabled>
+                    <i class="fas fa-paper-plane"></i>
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-
+@section Scripts {
     <script>
-        const userId = '@userId';
-        let selectedUserId = null;
-        let selectedUsername = null;
-        let typingTimeout;
+        const emojiBtn = document.getElementById('emojiBtn');
+        const emojiPicker = document.getElementById('emojiPicker');
+        const messageInput = document.getElementById('messageInput');
 
-        const connection = new signalR.HubConnectionBuilder().withUrl('/chathub').build();
+               const emojis = [
+            // Smileys & People
+            "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚",
+            "😋","😛","😝","😜","🤪","😎","🤓","🧐","😕","😟","🙁","☹️","😮","😯","😲","😳","🥺","😦","😧","😨",
+            "😰","😥","😢","😭","😱","😖","😣","😞","😓","😩","😫","😤","😡","😠","🤬","🤯","😳","🥵","🥶","😶",
+            "😐","😑","😬","🙄","😯","😦","😧","😮","😲","🥱","😴","🤤","😪","😵","🤐","🥴","🤢","🤮","🤧","😷",
+            "🤒","🤕","🤑","🤠","😈","👿","👹","👺","🤡","💩","👻","💀","☠️","👽","👾","🤖","🎃",
 
-        connection.start().then(() => {
-            connection.invoke('Register', userId);
-        }).catch(err => console.error(err.toString()));
+            // Hands & Gestures
+            "👋","🤚","🖐","✋","🖖","👌","🤌","🤏","✌️","🤞","🤟","🤘","🤙","👈","👉","👆","🖕","👇","☝️",
+            "👍","👎","✊","👊","🤛","🤜","🤚","🙌","👐","🤲","🤝","🙏",
 
-        // receive new message
-        connection.on('ReceiveMessage', (msg) => {
-            if (selectedUserId === msg.from) {
-                appendMessage(msg, false);
-                fetch('/Chat/MarkRead', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ fromUserId: msg.from }) });
-            } else {
-                const badge = document.getElementById('unread-' + msg.from);
-                if (badge) {
-                    badge.style.display = 'inline-block';
-                    badge.innerText = (parseInt(badge.innerText || '0') + 1).toString();
-                }
-                showNotification(msg.fromName, msg.message);
-            }
-        });
+            // Hearts & Love
+            "❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❣️","💕","💞","💓","💗","💖","💘","💝","💌",
 
-        // own message confirmation
-        connection.on('MessageSent', (msg) => {
-            appendMessage(msg, true);
-        });
+            // Animals & Nature
+            "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐽","🐸","🐵","🦍","🦧","🐔",
+            "🐧","🐦","🐤","🐣","🐥","🦆","🦢","🦉","🦚","🦜","🦇","🐺","🐗","🐴","🦄","🐝","🐛","🦋","🐌","🐞",
+            "🐜","🦗","🕷","🕸","🦂","🐢","🐍","🦎","🐙","🦑","🦀","🦞","🐡","🐠","🐟","🐬","🐳","🐋","🐊","🐅",
+            "🐆","🦓","🦍","🦧","🦣","🦛","🦏",
 
-        
-        connection.on('UserTyping', (fromUserId) => {
-            if (selectedUserId === fromUserId) {
-                document.getElementById('typingIndicator').style.display = 'block';
-                clearTimeout(typingTimeout);
-                typingTimeout = setTimeout(() => {
-                    document.getElementById('typingIndicator').style.display = 'none';
-                }, 1500);
-            }
-        });
+            // Food & Drink
+            "🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🍈","🍒","🍑","🥭","🍍","🥥","🥝","🍅","🍆","🥑",
+            "🥦","🥬","🥒","🌶","🫑","🌽","🥕","🥔","🍠","🥐","🥖","🥨","🥯","🥞","🧇","🧀","🍖","🍗","🥩",
+            "🥓","🍔","🍟","🌭","🍕","🫓","🥪","🥙","🥗","🍿","🧈","🥫","🍱","🍣","🍛","🍜","🍲","🥘","🥣",
+            "🥤","☕","🍵","🍶","🍺","🍻","🥂","🍷","🥃","🍸","🍹","🧋","🧃",
 
-        // append message bubble
-        function appendMessage(msg, isOwn) {
-            const div = document.createElement('div');
-            div.classList.add('message-bubble', isOwn ? 'own' : 'other');
-            let senderLabel = isOwn ? '' : `<strong>${selectedUsername}</strong><br>`;
-            let time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            // Travel & Places
+            "🚗","🚕","🚙","🚌","🚎","🏎","🚓","🚑","🚒","🚐","🛻","🚚","🚛","🚜","🏍","🛵","🛺","🚲","🛴",
+            "🛹","🛶","⛵","🚤","🛳","⛴","🚢","✈️","🛩","🛫","🛬","🚁","🚟","🚠","🚡","🛰","🚀","🛸","🏠",
+            "🏡","🏘","🏚","🏢","🏬","🏣","🏤","🏥","🏦","🏨","🏩","🏪","🏫","🏭","🏯","🏰","🏗","🏛","⛪","🕌","🕍","🕋",
 
-            div.innerHTML = `${senderLabel}${msg.message}<div class="message-time">${time}</div>`;
-            document.getElementById('chatWindow').appendChild(div);
-            document.getElementById('chatWindow').scrollTop = document.getElementById('chatWindow').scrollHeight;
-        }
+            // Symbols & Misc
+            "⭐","🌟","✨","⚡","☀️","🌤","⛅","☁️","🌧","⛈","🌩","🌨","❄️","☃️","🌬","💨","🌪","🌈","🌊",
+            "🔥","💧","🌱","🌿","☘️","🍀","🎄","🎃","🎆","🎇","🧨","🎈","🎉","🎊","🎁","🎗","🏆","🏅","🎖",
+            "🏵","🎫","🎟","🎭","🎨","🎬","🎤","🎧","🎼","🎹","🥁","🎷","🎺","🎸","🪕","🎻","🏹","🎯","🎲",
+            "♠️","♥️","♦️","♣️","🃏","🎴","🀄"
+        ];
 
-        // select user
-        document.querySelectorAll('.user-item').forEach(item => {
-            item.addEventListener('click', () => {
-                document.querySelectorAll('.user-item').forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-
-                selectedUserId = item.getAttribute('data-user-id');
-                selectedUsername = item.querySelector('span').innerText;
-                document.getElementById('chatHeader').innerText = selectedUsername;
-                document.getElementById('chatWindow').innerHTML = '';
-
-                const badge = document.getElementById('unread-' + selectedUserId);
-                if (badge) { badge.style.display = 'none'; badge.innerText = '0'; }
-
-                fetch('/Chat/Conversation?otherUserId=' + selectedUserId)
-                    .then(r => r.json())
-                    .then(msgs => {
-                        msgs.forEach(m => appendMessage(m, m.from === userId));
-                        fetch('/Chat/MarkRead', { method: 'POST', headers: {'Content-Type':'application/x-www-form-urlencoded'}, body: 'fromUserId=' + encodeURIComponent(selectedUserId) });
-                    });
+        emojis.forEach(e => {
+            const span = document.createElement('span');
+            span.textContent = e;
+            span.addEventListener('click', () => {
+                messageInput.value += e;
+                messageInput.focus();
             });
+            emojiPicker.appendChild(span);
         });
 
-        // send message
-        document.getElementById('sendBtn').addEventListener('click', () => sendMessage(false));
-
-        document.getElementById('messageInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage(false);
-            else connection.invoke('Typing', userId, selectedUserId);
+        // Toggle emoji picker on button click
+        emojiBtn.addEventListener('click', () => {
+            emojiPicker.style.display = emojiPicker.style.display === 'none' ? 'flex' : 'none';
         });
-
-        document.getElementById('sendOneTimeBtn').addEventListener('click', () => sendMessage(true));
-       
-
-        function sendMessage(oneTime) {
-            const text = document.getElementById('messageInput').value;
-            if (!selectedUserId) return;
-            if (!text.trim()) return;
-
-            console.log(oneTime);
-            console.log(text);
-            console.log(userId);
-            console.log(selectedUserId);
-
-            connection.invoke('SendMessage', userId, selectedUserId, text, oneTime);
-            document.getElementById('messageInput').value = '';
-        }
-
-        function showNotification(from, message) {
-            if (Notification.permission === "granted") {
-                new Notification(`💬 New message from ${from}`, { body: message });
-            } else if (Notification.permission !== "denied") {
-                Notification.requestPermission().then(p => {
-                    if (p === "granted") new Notification(`💬 New message from ${from}`, { body: message });
-                });
-            }
-        }
     </script>
-</body>
-</html>
+    <script src="~/js/index.js"></script>
+}
