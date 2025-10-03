@@ -3,502 +3,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Enhanced</title>
+    <title>ChatApp Register</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
-            --primary-color: #4361ee;
-            --secondary-color: #3f37c9;
-            --success-color: #4cc9f0;
+            --primary-color: #00bfa6;
+            --secondary-color: #00897b;
             --danger-color: #f72585;
-            --light-bg: #f8f9fa;
-            --dark-text: #212529;
-            --border-radius: 12px;
-            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --border-radius: 16px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
-        
-        .register-container {
-            max-width: 500px;
-            margin: 2rem auto;
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url("https://images.unsplash.com/photo-1525182008055-f88b95ff7980?auto=format&fit=crop&w=1400&q=80") no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
         }
-        
+
+            body::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.6);
+                z-index: 0;
+            }
+
         .register-card {
-            background: white;
+            width: 100%;
+            max-width: 520px;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
             border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-        
-        .register-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .register-header {
-            background: var(--primary-color);
-            color: white;
-            padding: 1.5rem;
-            text-align: center;
-        }
-        
-        .register-body {
+            box-shadow: var(--shadow);
             padding: 2rem;
+            position: relative;
+            z-index: 1;
+            margin: auto;
         }
-        
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+            .register-header h2 {
+                font-weight: 700;
+                color: var(--primary-color);
+            }
+
         .form-control {
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            border: 1px solid #e1e5eb;
-            transition: all 0.3s;
+            border-radius: 10px;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
         }
-        
-        .form-control:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
-        }
-        
+
+            .form-control:focus {
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 0.2rem rgba(0, 191, 166, 0.25);
+            }
+
         .input-group-text {
-            background: var(--light-bg);
-            border: 1px solid #e1e5eb;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 10px 0 0 10px;
         }
-        
+
         .btn-primary {
             background: var(--primary-color);
             border: none;
-            padding: 0.75rem;
-            border-radius: 8px;
+            border-radius: 10px;
+            padding: 0.85rem;
             font-weight: 600;
             transition: all 0.3s;
         }
-        
-        .btn-primary:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-        
+
+            .btn-primary:hover {
+                background: var(--secondary-color);
+                transform: translateY(-2px);
+            }
+
         .password-toggle {
             cursor: pointer;
             color: #6c757d;
-            transition: color 0.3s;
         }
-        
-        .password-toggle:hover {
-            color: var(--primary-color);
-        }
-        
+
+            .password-toggle:hover {
+                color: var(--primary-color);
+            }
+
         .password-strength {
-            height: 5px;
+            height: 6px;
             border-radius: 5px;
-            margin-top: 5px;
-            transition: all 0.3s;
+            margin-top: 6px;
+            transition: width 0.3s ease;
         }
-        
+
         .password-weak {
             background-color: var(--danger-color);
             width: 25%;
         }
-        
+
         .password-medium {
             background-color: #ffaa00;
             width: 50%;
         }
-        
+
         .password-strong {
             background-color: #4ade80;
             width: 75%;
         }
-        
+
         .password-very-strong {
             background-color: #16a34a;
             width: 100%;
         }
-        
+
         .password-feedback {
             font-size: 0.85rem;
             margin-top: 5px;
         }
-        
-        .form-text {
-            font-size: 0.85rem;
-            color: #6c757d;
-        }
-        
-        .alert {
-            border-radius: 8px;
-            border: none;
-            padding: 0.75rem 1rem;
-        }
-        
-        .row {
-            margin-bottom: 1rem;
-        }
-        
-        .field-requirements {
-            font-size: 0.85rem;
-            color: #6c757d;
-            margin-top: 0.5rem;
-        }
-        
+
         .requirement {
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
-            margin-bottom: 0.25rem;
+            margin-top: 3px;
         }
-        
-        .requirement i {
-            margin-right: 0.5rem;
-            font-size: 0.75rem;
+
+            .requirement i {
+                margin-right: 6px;
+                font-size: 0.75rem;
+            }
+
+            .requirement.met {
+                color: #16a34a;
+            }
+
+            .requirement.unmet {
+                color: #6c757d;
+            }
+
+        .text-link {
+            color: var(--primary-color);
+            text-decoration: none;
         }
-        
-        .requirement.met {
-            color: #16a34a;
+
+            .text-link:hover {
+                text-decoration: underline;
+            }
+
+        @@media (max-width: 576px) {
+            .register-card
+
+        {
+            padding: 1.5rem;
         }
-        
-        .requirement.unmet {
-            color: #6c757d;
+
         }
-        
     </style>
 </head>
 <body>
-    <div class="register-container">
+    <div class="d-flex align-items-center justify-content-center vh-100">
         <div class="register-card">
             <div class="register-header">
                 <h2><i class="fas fa-user-plus me-2"></i>Create Account</h2>
-                <p class="mb-0">Join our community today</p>
+                <p class="text-muted">Join our chat community</p>
             </div>
-            
-            <div class="register-body">
-                <!-- Display validation errors -->
-         
-                <form method="post" asp-controller="Account" asp-action="Register" id="registerForm">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="firstName" class="form-label">First Name *</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                    <input type="text" class="form-control" id="firstName" name="firstName" 
-                                           placeholder="Enter your first name" required>
-                                </div>
-                                <div class="field-requirements">
-                                    <div class="requirement unmet" id="firstNameReq">
-                                        <i class="fas fa-circle"></i> Required field
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="lastName" class="form-label">Last Name</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                    <input type="text" class="form-control" id="lastName" name="lastName" 
-                                           placeholder="Enter your last name">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email Address *</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                            <input type="email" class="form-control" id="email" name="email" 
-                                   placeholder="Enter your email address" required>
-                        </div>
-                        <div class="field-requirements">
-                            <div class="requirement unmet" id="emailReq">
-                                <i class="fas fa-circle"></i> Valid email address required
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username *</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-at"></i></span>
-                            <input type="text" class="form-control" id="username" name="username" 
-                                   placeholder="Choose a username" required>
 
-                        </div>
-                        <div class="field-requirements">
-                            <div class="requirement unmet" id="usernameReq">
-                                <i class="fas fa-circle"></i> 3-20 characters, letters and numbers only
-                            </div>
-                            <div class="requirement unmet" id="usernameAvailable">
-                                <i class="fas fa-circle"></i> Username available
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password *</label>
+            <form id="registerForm">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">First Name *</label>
                         <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                            <input type="password" class="form-control" id="password" name="passwordHash" 
-                                   placeholder="Create a strong password" required>
-                            <span class="input-group-text password-toggle" id="togglePassword">
-                                <i class="fas fa-eye"></i>
-                            </span>
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" id="firstName" class="form-control" placeholder="Enter first name" required>
                         </div>
-                        <div class="password-strength" id="passwordStrength"></div>
-                        <div class="password-feedback" id="passwordFeedback"></div>
-                        <div class="field-requirements">
-                            <div class="requirement unmet" id="lengthReq">
-                                <i class="fas fa-circle"></i> At least 8 characters
-                            </div>
-                            <div class="requirement unmet" id="uppercaseReq">
-                                <i class="fas fa-circle"></i> One uppercase letter
-                            </div>
-                            <div class="requirement unmet" id="lowercaseReq">
-                                <i class="fas fa-circle"></i> One lowercase letter
-                            </div>
-                            <div class="requirement unmet" id="numberReq">
-                                <i class="fas fa-circle"></i> One number
-                            </div>
-                        </div>
+                        <div class="requirement unmet" id="firstNameReq"><i class="fas fa-circle"></i> Required field</div>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label for="confirmPassword" class="form-label">Confirm Password *</label>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Last Name</label>
                         <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                            <input type="password" class="form-control" id="confirmPassword" 
-                                   placeholder="Re-enter your password" required>
-                        </div>
-                        <div class="field-requirements">
-                            <div class="requirement unmet" id="matchReq">
-                                <i class="fas fa-circle"></i> Passwords must match
-                            </div>
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" id="lastName" class="form-control" placeholder="Enter last name">
                         </div>
                     </div>
-                    
-                    <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                            <i class="fas fa-user-plus me-2"></i>Create Account
-                        </button>
-                    </div>
-                </form>
-                
-                <div class="text-center mt-3">
-                    <p>Already have an account? <a href="/Account/Login" class="text-decoration-none">Sign in here</a></p>
                 </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                        <input type="email" id="email" class="form-control" placeholder="Enter email address" required>
+                    </div>
+                    <div class="requirement unmet" id="emailReq"><i class="fas fa-circle"></i> Valid email required</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Username *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-at"></i></span>
+                        <input type="text" id="username" class="form-control" placeholder="Choose a username" required>
+                    </div>
+                    <div class="requirement unmet" id="usernameReq"><i class="fas fa-circle"></i> 3-20 letters/numbers</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Password *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input type="password" id="password" class="form-control" placeholder="Create password" required>
+                        <span class="input-group-text password-toggle" id="togglePassword"><i class="fas fa-eye"></i></span>
+                    </div>
+                    <div class="password-strength" id="passwordStrength"></div>
+                    <div class="password-feedback" id="passwordFeedback"></div>
+                    <div class="requirement unmet" id="lengthReq"><i class="fas fa-circle"></i> At least 8 characters</div>
+                    <div class="requirement unmet" id="uppercaseReq"><i class="fas fa-circle"></i> One uppercase</div>
+                    <div class="requirement unmet" id="lowercaseReq"><i class="fas fa-circle"></i> One lowercase</div>
+                    <div class="requirement unmet" id="numberReq"><i class="fas fa-circle"></i> One number</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Confirm Password *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input type="password" id="confirmPassword" class="form-control" placeholder="Re-enter password" required>
+                    </div>
+                    <div class="requirement unmet" id="matchReq"><i class="fas fa-circle"></i> Passwords must match</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 mt-3"><i class="fas fa-user-plus me-2"></i>Create Account</button>
+            </form>
+
+            <div class="text-center mt-3">
+                <p>Already have an account? <a href="/Account/Login" class="text-link">Login here</a></p>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Toggle password visibility
-        document.getElementById('togglePassword').addEventListener('click', function() {
-            const passwordInput = document.getElementById('password');
-            const confirmInput = document.getElementById('confirmPassword');
-            const icon = this.querySelector('i');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                confirmInput.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                confirmInput.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
+        document.getElementById('togglePassword').addEventListener('click', function () {
+          const password = document.getElementById('password');
+          const confirm = document.getElementById('confirmPassword');
+          const icon = this.querySelector('i');
+          const type = password.type === 'password' ? 'text' : 'password';
+          password.type = type;
+          confirm.type = type;
+          icon.classList.toggle('fa-eye');
+          icon.classList.toggle('fa-eye-slash');
         });
-        
-        // Password strength indicator
-        document.getElementById('password').addEventListener('input', function() {
-            const password = this.value;
-            const strengthBar = document.getElementById('passwordStrength');
-            const feedback = document.getElementById('passwordFeedback');
-            
-            // Reset requirements
-            document.getElementById('lengthReq').classList.remove('met');
-            document.getElementById('uppercaseReq').classList.remove('met');
-            document.getElementById('lowercaseReq').classList.remove('met');
-            document.getElementById('numberReq').classList.remove('met');
-            
-            let strength = 0;
-            let feedbackText = '';
-            
-            // Check password length
-            if (password.length >= 8) {
-                strength += 25;
-                document.getElementById('lengthReq').classList.add('met');
-            }
-            
-            // Check for uppercase letters
-            if (/[A-Z]/.test(password)) {
-                strength += 25;
-                document.getElementById('uppercaseReq').classList.add('met');
-            }
-            
-            // Check for lowercase letters
-            if (/[a-z]/.test(password)) {
-                strength += 25;
-                document.getElementById('lowercaseReq').classList.add('met');
-            }
-            
-            // Check for numbers
-            if (/[0-9]/.test(password)) {
-                strength += 25;
-                document.getElementById('numberReq').classList.add('met');
-            }
-            
-            // Update strength bar and feedback
-            strengthBar.className = 'password-strength';
-            if (strength === 0) {
-                feedbackText = '';
-            } else if (strength <= 25) {
-                strengthBar.classList.add('password-weak');
-                feedbackText = 'Weak password';
-            } else if (strength <= 50) {
-                strengthBar.classList.add('password-medium');
-                feedbackText = 'Medium password';
-            } else if (strength <= 75) {
-                strengthBar.classList.add('password-strong');
-                feedbackText = 'Strong password';
-            } else {
-                strengthBar.classList.add('password-very-strong');
-                feedbackText = 'Very strong password';
-            }
-            
-            feedback.textContent = feedbackText;
-            
-            // Check password match
-            checkPasswordMatch();
+
+        // Password strength checker
+        document.getElementById('password').addEventListener('input', function () {
+          const pass = this.value;
+          let strength = 0;
+          const bar = document.getElementById('passwordStrength');
+          const fb = document.getElementById('passwordFeedback');
+
+          bar.className = "password-strength";
+          fb.textContent = "";
+
+          if (pass.length >= 8) { strength += 25; document.getElementById('lengthReq').classList.add('met'); }
+          else { document.getElementById('lengthReq').classList.remove('met'); }
+          if (/[A-Z]/.test(pass)) { strength += 25; document.getElementById('uppercaseReq').classList.add('met'); }
+          else { document.getElementById('uppercaseReq').classList.remove('met'); }
+          if (/[a-z]/.test(pass)) { strength += 25; document.getElementById('lowercaseReq').classList.add('met'); }
+          else { document.getElementById('lowercaseReq').classList.remove('met'); }
+          if (/[0-9]/.test(pass)) { strength += 25; document.getElementById('numberReq').classList.add('met'); }
+          else { document.getElementById('numberReq').classList.remove('met'); }
+
+          if (strength <= 25 && pass) { bar.classList.add("password-weak"); fb.textContent = "Weak"; }
+          else if (strength <= 50) { bar.classList.add("password-medium"); fb.textContent = "Medium"; }
+          else if (strength <= 75) { bar.classList.add("password-strong"); fb.textContent = "Strong"; }
+          else if (strength == 100) { bar.classList.add("password-very-strong"); fb.textContent = "Very Strong"; }
+
+          checkMatch();
         });
-        
-        // Check if passwords match
-        document.getElementById('confirmPassword').addEventListener('input', checkPasswordMatch);
-        
-        function checkPasswordMatch() {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const matchReq = document.getElementById('matchReq');
-            
-            if (confirmPassword.length === 0) {
-                matchReq.classList.remove('met');
-                matchReq.classList.remove('unmet');
-                matchReq.innerHTML = '<i class="fas fa-circle"></i> Passwords must match';
-            } else if (password === confirmPassword && password.length > 0) {
-                matchReq.classList.add('met');
-                matchReq.classList.remove('unmet');
-                matchReq.innerHTML = '<i class="fas fa-check-circle"></i> Passwords match';
-            } else {
-                matchReq.classList.remove('met');
-                matchReq.classList.add('unmet');
-                matchReq.innerHTML = '<i class="fas fa-times-circle"></i> Passwords do not match';
-            }
+
+        // Match check
+        document.getElementById('confirmPassword').addEventListener('input', checkMatch);
+        function checkMatch() {
+          const p = document.getElementById('password').value;
+          const cp = document.getElementById('confirmPassword').value;
+          const match = document.getElementById('matchReq');
+          if (!cp) {
+            match.innerHTML = '<i class="fas fa-circle"></i> Passwords must match';
+          } else if (p === cp) {
+            match.classList.add('met'); match.innerHTML = '<i class="fas fa-check-circle"></i> Passwords match';
+          } else {
+            match.classList.remove('met'); match.innerHTML = '<i class="fas fa-times-circle"></i> Passwords do not match';
+          }
         }
-        
-        // Username validation
-        document.getElementById('username').addEventListener('input', function() {
-            const username = this.value;
-            const usernameReq = document.getElementById('usernameReq');
-            const usernameAvailable = document.getElementById('usernameAvailable');
-            
-            // Check username format
-            if (/^[a-zA-Z0-9]{3,20}$/.test(username)) {
-                usernameReq.classList.add('met');
-                usernameReq.classList.remove('unmet');
-                usernameReq.innerHTML = '<i class="fas fa-check-circle"></i> Valid username format';
-                
-                // In a real app, you would check availability via AJAX here
-                // For demo, we'll simulate a check
-                setTimeout(() => {
-                    if (username.length >= 3) {
-                        usernameAvailable.classList.add('met');
-                        usernameAvailable.classList.remove('unmet');
-                        usernameAvailable.innerHTML = '<i class="fas fa-check-circle"></i> Username available';
-                    }
-                }, 500);
-            } else {
-                usernameReq.classList.remove('met');
-                usernameReq.classList.add('unmet');
-                usernameReq.innerHTML = '<i class="fas fa-times-circle"></i> 3-20 characters, letters and numbers only';
-                
-                usernameAvailable.classList.remove('met');
-                usernameAvailable.classList.add('unmet');
-                usernameAvailable.innerHTML = '<i class="fas fa-circle"></i> Username available';
-            }
-        });
-        
-        // Email validation
-        document.getElementById('email').addEventListener('input', function() {
-            const email = this.value;
-            const emailReq = document.getElementById('emailReq');
-            
-             if (email.length > 0) {
-                emailReq.classList.remove('met');
-                emailReq.classList.add('unmet');
-                emailReq.innerHTML = '<i class="fas fa-times-circle"></i> Please enter a valid email';
-            } else {
-                emailReq.classList.remove('met');
-                emailReq.classList.add('unmet');
-                emailReq.innerHTML = '<i class="fas fa-circle"></i> Valid email address required';
-            }
-        });
-        
-        // First name validation
-        document.getElementById('firstName').addEventListener('input', function() {
-            const firstName = this.value;
-            const firstNameReq = document.getElementById('firstNameReq');
-            
-            if (firstName.length > 0) {
-                firstNameReq.classList.add('met');
-                firstNameReq.classList.remove('unmet');
-                firstNameReq.innerHTML = '<i class="fas fa-check-circle"></i> First name provided';
-            } else {
-                firstNameReq.classList.remove('met');
-                firstNameReq.classList.add('unmet');
-                firstNameReq.innerHTML = '<i class="fas fa-circle"></i> Required field';
-            }
-        });
-        
-        // Form validation
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            const firstName = document.getElementById('firstName').value;
-            const email = document.getElementById('email').value;
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            let isValid = true;
-            let errorMessage = '';
-            
-            if (!firstName) {
-                isValid = false;
-                errorMessage = 'First name is required.';
-            } elseif (!/^[a-zA-Z0-9]{3,20}$/.test(username)) {
-                isValid = false;
-                errorMessage = 'Username must be 3-20 characters and contain only letters and numbers.';
-            } else if (password.length < 8) {
-                isValid = false;
-                errorMessage = 'Password must be at least 8 characters long.';
-            } else if (password !== confirmPassword) {
-                isValid = false;
-                errorMessage = 'Passwords do not match.';
-            }
-            
-            if (!isValid) {
-                e.preventDefault();
-                alert('Please fix the following error: ' + errorMessage);
-            }
-            
-            // In a real application, you would send the data to the server here
-            console.log('Registration attempt with:', { 
-                firstName: document.getElementById('firstName').value,
-                lastName: document.getElementById('lastName').value,
-                email: document.getElementById('email').value,
-                username: document.getElementById('username').value,
-                password: document.getElementById('password').value
-            });
-        });
     </script>
 </body>
 </html>

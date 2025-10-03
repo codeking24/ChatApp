@@ -1,319 +1,187 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Enhanced</title>
+    <title>ChatApp Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
     <style>
         :root {
-            --primary-color: #4361ee;
-            --secondary-color: #3f37c9;
-            --success-color: #4cc9f0;
-            --light-bg: #f8f9fa;
-            --dark-text: #212529;
-            --border-radius: 12px;
-            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --primary-color: #00bfa6;
+            --secondary-color: #00897b;
+            --border-radius: 18px;
+            --shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         }
 
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
+            margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Background image */
+            background: url("https://images.unsplash.com/photo-1525182008055-f88b95ff7980?auto=format&fit=crop&w=1400&q=80") no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
         }
 
-        .login-container {
-            max-width: 420px;
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        .login-card {
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-
-            .login-card:hover {
-                transform: translateY(-5px);
+            /* Dark overlay for readability */
+            body::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.55);
+                z-index: 0;
             }
 
-        .login-header {
-            background: var(--primary-color);
-            color: white;
-            padding: 1.5rem;
+        .chat-login-card {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+            z-index: 1;
+            margin: auto;
+        }
+
+        .chat-header {
             text-align: center;
         }
 
-        .login-body {
-            padding: 2rem;
+            .chat-header h2 {
+                font-weight: 700;
+                color: var(--primary-color);
+            }
+
+        .message-bubble {
+            background: #e6f7f6;
+            border-radius: 15px;
+            padding: 1rem;
+            display: inline-block;
+            max-width: 100%;
+            margin-bottom: 1rem;
         }
 
         .form-control {
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            border: 1px solid #e1e5eb;
-            transition: all 0.3s;
-        }
-
-            .form-control:focus {
-                border-color: var(--primary-color);
-                box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
-            }
-
-        .input-group-text {
-            background: var(--light-bg);
-            border: 1px solid #e1e5eb;
-            border-right: none;
+            border-radius: 12px;
+            padding: 0.9rem;
         }
 
         .btn-primary {
             background: var(--primary-color);
             border: none;
-            padding: 0.75rem;
-            border-radius: 8px;
+            border-radius: 12px;
+            padding: 0.85rem;
             font-weight: 600;
             transition: all 0.3s;
         }
 
             .btn-primary:hover {
                 background: var(--secondary-color);
-                transform: translateY(-2px);
             }
-
-        .btn-outline-primary {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-        }
-
-            .btn-outline-primary:hover {
-                background: var(--primary-color);
-                color: white;
-            }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 1.5rem 0;
-        }
-
-            .divider::before, .divider::after {
-                content: "";
-                flex: 1;
-                border-bottom: 1px solid #dee2e6;
-            }
-
-        .divider-text {
-            padding: 0 1rem;
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
-        .social-login {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .social-btn {
-            flex: 1;
-            padding: 0.6rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: all 0.3s;
-        }
-
-            .social-btn.google {
-                background: #fff;
-                border: 1px solid #ddd;
-                color: #757575;
-            }
-
-                .social-btn.google:hover {
-                    background: #f5f5f5;
-                }
-
-            .social-btn.facebook {
-                background: #3b5998;
-                border: 1px solid #3b5998;
-                color: white;
-            }
-
-                .social-btn.facebook:hover {
-                    background: #344e86;
-                }
-
-        .password-toggle {
-            cursor: pointer;
-            color: #6c757d;
-            transition: color 0.3s;
-        }
-
-            .password-toggle:hover {
-                color: var(--primary-color);
-            }
-
-        .additional-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-        }
-
-        .remember-me {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
 
         .forgot-password {
-            color: var(--primary-color);
+            font-size: 0.85rem;
             text-decoration: none;
+            color: var(--primary-color);
         }
 
             .forgot-password:hover {
                 text-decoration: underline;
             }
 
-        .alert {
-            border-radius: 8px;
-            border: none;
-            padding: 0.75rem 1rem;
+        .register-link {
+            text-align: center;
+            font-size: 0.9rem;
         }
 
-        .features-list {
-            list-style: none;
-            padding: 0;
-            margin-top: 1.5rem;
+        /* Responsive tweaks */
+        @@media (max-width: 576px) {
+            .chat-login-card
+
+        {
+            padding: 1.25rem;
+            border-radius: 14px;
         }
 
-            .features-list li {
-                padding: 0.5rem 0;
-                display: flex;
-                align-items: center;
-                gap: 0.75rem;
-                color: #495057;
-            }
-
-                .features-list li i {
-                    color: var(--success-color);
-                }
+        }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <h2><i class="fas fa-lock me-2"></i>Secure Login</h2>
-                <p class="mb-0">Access your account</p>
+    <div class="d-flex align-items-center justify-content-center vh-100">
+        <div class="chat-login-card">
+            <div class="chat-header">
+                <h2><i class="fas fa-comments me-2"></i> ChatApp Login</h2>
+                <p class="text-muted mb-0">Welcome back! 👋</p>
             </div>
 
-            <div class="login-body">
-               
+            <!-- Chat style bubble -->
+            <div class="message-bubble">
+                <p><i class="fas fa-robot me-2 text-primary"></i>Hey! Enter your details to continue.</p>
+            </div>
 
-                <form method="post" asp-controller="Account" asp-action="Login" id="loginForm">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username or Email</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-user"></i></span>
-                            <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username or email" required>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
-                            <span class="input-group-text password-toggle" id="togglePassword">
-                                <i class="fas fa-eye"></i>
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="additional-options">
-                        <div class="remember-me">
-                            <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
-                            <label class="form-check-label" for="rememberMe">Remember me</label>
-                        </div>
-                        @* <a href="#" class="forgot-password">Forgot password?</a> *@
-                    </div>
-
-                    <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-sign-in-alt me-2"></i>Login
-                        </button>
-                    </div>
-                </form>
-
-              
-                <div class="text-center">
-                    <p>Don't have an account? <a href="/Account/Register" class="text-decoration-none">Register now</a></p>
+            <form method="post" id="loginForm">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="username" name="username" placeholder="👤 Username or Email" required>
                 </div>
 
-                <ul class="features-list">
-                    <li><i class="fas fa-shield-alt"></i> Secure authentication</li>
-                    <li><i class="fas fa-bolt"></i> Fast and responsive</li>
-                </ul>
+                <div class="mb-3 position-relative">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="🔑 Password" required>
+                    <span class="position-absolute top-50 end-0 translate-middle-y me-3 text-muted" id="togglePassword" style="cursor: pointer;">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
+                        <label class="form-check-label small" for="rememberMe">Remember me</label>
+                    </div>
+                    <a href="#" class="forgot-password">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </button>
+            </form>
+
+            <div class="register-link">
+                <p>New here? <a href="/Account/Register" class="text-decoration-none">Create an account</a></p>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Toggle password visibility
-        document.getElementById('togglePassword').addEventListener('click', function() {
-            const passwordInput = document.getElementById('password');
-            const icon = this.querySelector('i');
-
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
+        // Toggle password
+        document.getElementById('togglePassword').addEventListener('click', function () {
+          const passwordInput = document.getElementById('password');
+          const icon = this.querySelector('i');
+          if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+          } else {
+            passwordInput.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+          }
         });
 
-        // Form validation
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            if (!username || !password) {
-                e.preventDefault();
-                alert('Please fill in all required fields.');
-                return;
-            }
-
-            // In a real application, you would send the data to the server here
-            console.log('Login attempt with:', { username, password });
-        });
-
-        // Demo functionality for social login buttons
-        document.querySelectorAll('.social-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const provider = this.classList.contains('google') ? 'Google' : 'Facebook';
-                alert(`In a real application, this would redirect to ${provider} authentication.`);
-            });
-        });
-
-        // Demo functionality for forgot password
-        document.querySelector('.forgot-password').addEventListener('click', function(e) {
+        // Simple form validation
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+          const username = document.getElementById('username').value;
+          const password = document.getElementById('password').value;
+          if (!username || !password) {
             e.preventDefault();
-            alert('In a real application, this would open a password recovery dialog.');
+            alert('Please fill in all fields!');
+          }
         });
     </script>
 </body>

@@ -54,11 +54,13 @@ namespace MongoDbTutorial.Controllers
             HttpContext.Session.SetString("Username", user.Username);
             return RedirectToAction("Index", "Chat");
         }
-
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
+
     }
 }
