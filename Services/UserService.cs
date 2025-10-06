@@ -1,4 +1,6 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
+using MongoDbTutorial.Models;
 using MongoDbTutorial.Models.Users;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,10 +10,89 @@ namespace MongoDbTutorial.Services
     public class UserService
     {
         private readonly IMongoCollection<User> _users;
+        private readonly IMongoCollection<Follow> _follow;
 
         public UserService(IMongoDatabase database)
         {
             _users = database.GetCollection<User>("users");
+            _follow = database.GetCollection<Follow>("follows");
+        }
+
+        public async Task FollowUserAsync(string followerId, string followeeId)
+        {
+            if (followerId == followeeId) return; // Prevent self-follow
+
+            var exists = await _follow.Find(f =>
+                f.FollowerId == followerId && f.FollowingId == followeeId).AnyAsync();
+
+            if (!exists)
+            {
+                var follow = new Follow
+                {
+                    FollowerId = followerId,
+                    FollowingId = followeeId                   
+                };
+                await _follow.InsertOneAsync(follow);
+            }
+        }
+
+        public async Task UnfollowUserAsync(string followerId, string followeeId)
+        {
+            await _follow.DeleteOneAsync(f =>
+                f.FollowerId == followerId && f.FollowingId == followeeId);
+        }
+
+        public async Task<List<string>> GetFollowersAsync(string userId)
+        {
+            return await _follow.Find(f => f.FollowingId == userId && f.IsFollowing)
+                                .Project(f => f.FollowerId)
+                                .ToListAsync();
+        }
+
+        public async Task<List<string>> GetFollowingAsync(string userId)
+        {
+            return await _follow.Find(f => f.FollowerId == userId && f.IsFollowing)
+                                .Project(f => f.FollowingId)
+                                .ToListAsync();
+        }
+
+        public async Task<long> GetFollowersCountAsync(string userId)
+        {
+            return await _follow.CountDocumentsAsync(f => f.FollowingId == userId && f.IsFollowing);
+        }
+        public async Task<long> GetFollowingCountAsync(string userId)
+        {
+            return await _follow.CountDocumentsAsync(f => f.FollowerId == userId && f.IsFollowing);
+        }
+        public async Task<bool> IsFollowingAsync(string followerId, string followeeId)
+        {
+            return await _follow.Find(f =>
+                f.FollowerId == followerId && f.FollowingId == followeeId && f.IsFollowing).AnyAsync();
+        }
+
+        public async Task<UserInfoDto?> GetUserInfoAsync(string userId)
+        {
+            var user = await _users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+            if (user == null) return null;
+
+            // Get follower and following IDs
+            var followerIds = await _follow.Find(f => f.FollowingId == userId && f.IsFollowing)
+                                           .Project(f => f.FollowerId)
+                                           .ToListAsync();
+
+            var followingIds = await _follow.Find(f => f.FollowerId == userId && f.IsFollowing)
+                                            .Project(f => f.FollowingId)
+                                            .ToListAsync();
+
+            var followers = await _users.Find(u => followerIds.Contains(u.Id)).ToListAsync();
+            var following = await _users.Find(u => followingIds.Contains(u.Id)).ToListAsync();
+
+            return new UserInfoDto
+            {
+                User = MapToUserResponse(user),
+                Followers = [.. followers.Select(MapToUserResponse)],
+                Following = [.. following.Select(MapToUserResponse)]
+            };
         }
         public List<User> GetAllExcept(string? userId)
         {
@@ -37,6 +118,16 @@ namespace MongoDbTutorial.Services
             using var sha = SHA256.Create();
             var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
             return Convert.ToBase64String(bytes);
+        }
+        private UserResponse MapToUserResponse(User user)
+        {
+            return new UserResponse
+            {
+                Id = user.Id,
+                Username = user.Username,
+                FullName = $"{user.FirstName} {user.LastName}".Trim(),
+                Email = user.Email
+            };
         }
     }
 }

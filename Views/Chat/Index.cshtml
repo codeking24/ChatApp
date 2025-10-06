@@ -1,4 +1,6 @@
 ﻿@{
+    var userInfo = ViewBag.Users as MongoDbTutorial.Models.Users.UserInfoDto;
+    var userAll = ViewBag.AllUsers as List<MongoDbTutorial.Models.Users.User>;
     ViewBag.Title = "Chat";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -19,7 +21,7 @@
         </div>
 
         <div class="users-list" id="usersList">
-            @foreach (var user in ViewBag.Users)
+            @foreach (var user in userAll)
             {
                 <div class="user-item d-flex align-items-center" data-user-id="@user.Id">
                     <div class="user-avatar me-2">
@@ -27,6 +29,30 @@
                     </div>
                     <div class="user-info flex-grow-1">
                         <div class="user-name">@user.Username</div>
+                    </div>
+                    <span class="badge bg-danger ms-2" id="unread-@user.Id" style="display:none;">0</span>
+                </div>
+            }
+            @foreach (var user in userInfo.Followers)
+            {
+                <div class="user-item d-flex align-items-center" data-user-id="@user.Id">
+                    <div class="user-avatar me-2">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info flex-grow-1">
+                        <div class="user-name">@user.FullName</div>
+                    </div>
+                    <span class="badge bg-danger ms-2" id="unread-@user.Id" style="display:none;">0</span>
+                </div>
+            }
+            @foreach (var user in userInfo.Following)
+            {
+                <div class="user-item d-flex align-items-center" data-user-id="@user.Id">
+                    <div class="user-avatar me-2">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info flex-grow-1">
+                        <div class="user-name">@user.FullName</div>
                     </div>
                     <span class="badge bg-danger ms-2" id="unread-@user.Id" style="display:none;">0</span>
                 </div>

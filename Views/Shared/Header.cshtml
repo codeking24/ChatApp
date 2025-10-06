@@ -10,6 +10,11 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="nav-item me-2">
+                <input class="form-control" id="userSearch" type="text" placeholder="Search users..." autocomplete="off" />
+                <div id="searchResults" class="list-group position-absolute" style="z-index: 1000; display: none;"></div>
+            </div>
+
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="#" id="toggle-users">
@@ -34,3 +39,23 @@
         </div>
     </div>
 </nav>
+<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userModalLabel">User Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Full Name:</strong> <span id="modalFullName"></span></p>
+                <p><strong>Username:</strong> <span id="modalUsername"></span></p>
+                <p><strong>Email:</strong> <span id="modalEmail"></span></p>
+                <input type="hidden" id="modalUserId" />
+            </div>
+            <div class="modal-footer">
+                <form id="antiForgeryForm" method="post">@Html.AntiForgeryToken()</form>
+                <button id="followBtn" class="btn btn-primary">Follow</button>
+            </div>
+        </div>
+    </div>
+</div>

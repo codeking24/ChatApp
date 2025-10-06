@@ -9,8 +9,8 @@ self.addEventListener('push', function (event) {
     const title = data.title || 'New Message';
     const options = {
         body: data.body || 'You have a new notification',
-        icon: '/images/icon-192.png', // optional
-        badge: '/images/badge-72.png', // optional
+        //icon: '/images/icon-192.png', // optional
+        //badge: '/images/badge-72.png', // optional
         data: data.url || '/'
     };
 

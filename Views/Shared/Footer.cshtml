@@ -12,3 +12,74 @@
         </div>
     </div>
 </footer>
+<script>
+    const searchInput = document.getElementById('userSearch');
+    const resultsBox = document.getElementById('searchResults');
+
+    searchInput.addEventListener('input', function () {
+        const query = this.value.toLowerCase().trim();
+        resultsBox.innerHTML = '';
+        if (!query) return resultsBox.style.display = 'none';
+
+        const filtered = allUsers.filter(user =>
+            user.username.toLowerCase().includes(query) ||
+            user.fullName.toLowerCase().includes(query)
+        );
+
+        filtered.slice(0, 5).forEach(user => {
+            const item = document.createElement('a');
+            item.className = 'list-group-item list-group-item-action';
+            item.href = '#';
+            item.textContent = `${user.fullName} (${user.username})`;
+            item.addEventListener('click', () => showUserModal(user));
+            resultsBox.appendChild(item);
+        });
+
+        resultsBox.style.display = filtered.length > 0 ? 'block' : 'none';
+    });
+
+    document.addEventListener('click', e => {
+        if (!searchInput.contains(e.target) && !resultsBox.contains(e.target)) {
+            resultsBox.style.display = 'none';
+        }
+    });
+
+    function showUserModal(user) {
+        document.getElementById('modalFullName').textContent = user.fullName;
+        document.getElementById('modalUsername').textContent = user.username;
+        document.getElementById('modalEmail').textContent = user.email;
+        document.getElementById('modalUserId').value = user.id;
+
+        checkFollowStatus(user.id);
+        const modal = new bootstrap.Modal(document.getElementById('userModal'));
+        modal.show();
+    }
+
+    function checkFollowStatus(targetUserId) {
+        fetch(`/Follow/IsFollowing?targetUserId=${targetUserId}`)
+            .then(res => res.json())
+            .then(data => {
+                const btn = document.getElementById('followBtn');
+                btn.textContent = data.following ? 'Unfollow' : 'Follow';
+                btn.className = data.following ? 'btn btn-danger' : 'btn btn-primary';
+            });
+    }
+
+    document.getElementById('followBtn').addEventListener('click', function () {
+        const targetUserId = document.getElementById('modalUserId').value;
+        const action = this.textContent === 'Follow' ? 'Follow' : 'Unfollow';
+
+        fetch(`/Follow/${action}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: JSON.stringify({ targetUserId })
+        })
+        .then(res => {
+            if (res.ok) checkFollowStatus(targetUserId);
+            else alert("Error occurred");
+        });
+    });
+</script>

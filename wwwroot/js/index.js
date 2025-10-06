@@ -420,17 +420,13 @@ class ChatApplication {
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
         try {
-            // Register Service Worker
-            const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-            console.log('SW registered', reg);
 
-            // Optional: unsubscribe old
+            const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
             let sub = await reg.pushManager.getSubscription();
             if (sub) {
                 await sub.unsubscribe();
                 console.log('Old subscription unsubscribed');
             }
-            // Subscribe with VAPID key
             const applicationServerKey = this.urlBase64ToUint8Array(this.vapidPublicKey);
             sub = await reg.pushManager.subscribe({
                 userVisibleOnly: true,
@@ -438,7 +434,6 @@ class ChatApplication {
             });
 
             const subJson = sub.toJSON();
-
             // Send subscription to server
             await fetch('/PushSubscription/save', {
                 method: 'POST',

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MongoDbTutorial.Services;
+using System.Threading.Tasks;
 
 namespace MongoDbTutorial.Controllers
 {
@@ -7,25 +8,22 @@ namespace MongoDbTutorial.Controllers
     {
         private readonly UserService _users;
         private readonly ChatService _chat;
-
-
         public ChatController(UserService users, ChatService chat)
         {
             _users = users;
             _chat = chat;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var userId = HttpContext.Session.GetString("UserId");
             if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Account");
 
-
             ViewBag.UserId = userId;
             ViewBag.Username = HttpContext.Session.GetString("Username");
-            ViewBag.Users = _users.GetAllExcept(userId);
+            ViewBag.Users = await _users.GetUserInfoAsync(userId);
+            ViewBag.AllUsers = _users.GetAllExcept(userId);
             return View();
         }
-
 
         [HttpGet]
         public IActionResult Conversation(string otherUserId)
