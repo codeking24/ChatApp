@@ -11,6 +11,9 @@ class ChatApplication {
         this.isAutoScrolling = true;
         this.connection = null;
         this.vapidPublicKey = vapidPublicKey;
+        this.notificationCount = 0;
+        this.notificationBadge = document.getElementById('notificationCount');
+        this.notificationList = document.getElementById('notificationList');
 
         this.init();
     }
@@ -43,6 +46,26 @@ class ChatApplication {
         this.connection.on('ReceiveMessage', (msg) => this.onReceiveMessage(msg));
         this.connection.on('MessageSent', (msg) => this.appendMessage(msg, true));
         this.connection.on('UserTyping', (fromUserId, fromUserName) => this.showTypingIndicator(fromUserId, fromUserName));
+        this.connection.on('ReceiveFollowRequest', (requests) => {
+            this.notificationCount = requests.length;
+            if (this.notificationCount > 0) {
+                this.notificationBadge.style.display = 'inline-block';
+                this.notificationBadge.textContent = this.notificationCount;
+            } else {
+                this.notificationBadge.style.display = 'none';
+            }
+
+            this.notificationList.innerHTML = '';
+            requests.forEach(req => {
+                const div = document.createElement('div');
+                div.className = 'dropdown-item d-flex justify-content-between align-items-center';
+                div.innerHTML = `
+            <span>${req.fullName}</span>
+            <button class="btn btn-sm btn-success accept-btn" data-user-id="${req.id}">Accept</button>
+        `;
+                this.notificationList.appendChild(div);
+            });
+        });
 
         this.startConnection();
     }
@@ -52,12 +75,47 @@ class ChatApplication {
             console.log('Connected to SignalR Hub');
             await this.connection.invoke('Register', this.userId);
             this.updateConnectionStatus(true);
+            this.loadPendingFollowRequests();
         } catch (err) {
             console.error('SignalR connection error:', err);
             this.updateConnectionStatus(false);
         }
     }
 
+    async loadPendingFollowRequests() {
+        try {
+            const res = await fetch('/Account/PendingFollowRequests');
+            const data = await res.json();
+            if (!data.success) return;
+
+            this.notificationCount = data.pending.length;
+            this.updateNotificationBadge(data.pending);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    updateNotificationBadge(requests) {
+        if (!this.notificationBadge || !this.notificationList) return;
+
+        if (requests.length > 0) {
+            this.notificationBadge.style.display = 'inline-block';
+            this.notificationBadge.textContent = requests.length;
+        } else {
+            this.notificationBadge.style.display = 'none';
+        }
+
+        this.notificationList.innerHTML = '';
+        requests.forEach(req => {
+            const div = document.createElement('div');
+            div.className = 'dropdown-item d-flex justify-content-between align-items-center';
+            div.innerHTML = `
+            <span>${req.fullName}</span>
+            <button class="btn btn-sm btn-success accept-btn" data-user-id="${req.id}">Accept</button>
+        `;
+            this.notificationList.appendChild(div);
+        });
+    }
     updateConnectionStatus(isConnected) {
         const statusEl = document.getElementById('connection-status');
         if (!statusEl) return;
@@ -145,7 +203,7 @@ class ChatApplication {
         const sendBtn = document.getElementById('sendBtn');
         const sendOneTimeBtn = document.getElementById('sendOneTimeBtn');
         const messageInput = document.getElementById('messageInput');
-
+        
         if (sendBtn) {
             sendBtn.addEventListener('click', () => this.sendMessage(false));
         }
@@ -186,6 +244,14 @@ class ChatApplication {
             });
         }
 
+        const notificationToggle = document.getElementById('notificationToggle');
+        if (notificationToggle) {
+            notificationToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelector('.chat-users').classList.toggle('collapsed');
+            });
+        }
+
         // Auto-scroll indicator
         const autoScrollIndicator = document.getElementById('autoScrollIndicator');
         if (autoScrollIndicator) {
@@ -209,6 +275,29 @@ class ChatApplication {
                 this.filterUsers(e.target.value);
             });
         }
+
+        if (this.notificationList) {
+            this.notificationList.addEventListener('click', async (e) => {
+                if (!e.target.classList.contains('accept-btn')) return;
+
+                const btn = e.target;
+                const userId = btn.dataset.userId;
+
+                try {
+                    const res = await apiFetch(`/Account/AcceptFollow/${userId}`, { method: 'POST' });
+                    if (res?.success) {
+                        // Remove the accepted request from the dropdown
+                        btn.closest('.dropdown-item').remove();
+                        this.notificationCount--;
+                        if (this.notificationCount <= 0) this.notificationBadge.style.display = 'none';
+                        else this.notificationBadge.textContent = this.notificationCount;
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            });
+        }
+
     }
 
     filterUsers(searchTerm) {

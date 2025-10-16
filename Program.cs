@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using MongoDbTutorial.Hubs;
+using MongoDbTutorial.Middlewares;
 using MongoDbTutorial.Models;
 using MongoDbTutorial.Services;
 using WebPush;
@@ -53,6 +54,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseSession();   // session before authorization
+app.UseMiddleware<SessionCheckMiddleware>();
 app.UseAuthorization();
 
 app.MapControllerRoute(

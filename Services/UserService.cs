@@ -67,8 +67,33 @@ namespace MongoDbTutorial.Services
         public async Task<bool> IsFollowingAsync(string followerId, string followeeId)
         {
             return await _follow.Find(f =>
-                f.FollowerId == followerId && f.FollowingId == followeeId && f.IsFollowing).AnyAsync();
+                f.FollowerId == followerId && f.FollowingId == followeeId).AnyAsync();
         }
+
+        public async Task<List<UserResponse>> GetPendingFollowRequests(string userId)
+        {
+            var pendingFollows = await _follow
+                                    .Find(f => f.FollowingId == userId && !f.IsFollowing)
+                                    .ToListAsync();
+
+            if (!pendingFollows.Any()) return new List<UserResponse>();
+
+            var followerIds = pendingFollows.Select(f => f.FollowerId).ToList();
+
+            var filter = Builders<User>.Filter.In(u => u.Id, followerIds);
+            var users = await _users.Find(filter).ToListAsync();
+
+            var pendingRequests = users.Select(u => new UserResponse
+            {
+                Id = u.Id,
+                FullName = u.FirstName + ' ' + u.LastName,
+                Username = u.Username,
+                Email = u.Email
+            }).ToList();
+
+            return pendingRequests;
+        }
+
 
         public async Task<UserInfoDto?> GetUserInfoAsync(string userId)
         {
@@ -94,10 +119,19 @@ namespace MongoDbTutorial.Services
                 Following = [.. following.Select(MapToUserResponse)]
             };
         }
-        public List<User> GetAllExcept(string? userId)
+        public List<UserResponse> GetAllExcept(string? userId)
         {
             var filter = userId == null ? Builders<User>.Filter.Empty : Builders<User>.Filter.Ne(u => u.Id, userId);
-            return _users.Find(filter).ToList();
+            var users = _users.Find(filter).ToList();
+            var response = users.Select(u => new UserResponse
+            {
+                Id = u.Id,
+                Username = u.Username,
+                FullName = u.FirstName + ' ' + u.LastName,
+                Email = u.Email
+            }).ToList();
+
+            return response;
         }
         public User? GetById(string id) => _users.Find(u => u.Id == id).FirstOrDefault();
         public User? GetByUsername(string username) => _users.Find(u => u.Username == username).FirstOrDefault();

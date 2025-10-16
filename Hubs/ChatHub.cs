@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using MongoDbTutorial.Models;
+using MongoDbTutorial.Models.Users;
 using MongoDbTutorial.Services;
 using System.Collections.Concurrent;
 
@@ -8,14 +10,16 @@ namespace MongoDbTutorial.Hubs
     {
         private readonly PushSubscriptionService _pushService;
         private readonly PushService _pushNotifier;
-        private readonly ChatService _chatService;        
+        private readonly ChatService _chatService;
+        private readonly UserService _userService;
         private static readonly ConcurrentDictionary<string, string> ConnectedUsers = new();
 
-        public ChatHub(ChatService chatService, PushSubscriptionService pushService, PushService pushNotifier)
+        public ChatHub(ChatService chatService, PushSubscriptionService pushService, PushService pushNotifier, UserService userService)
         {
             _chatService = chatService;
             _pushService = pushService;
             _pushNotifier = pushNotifier;
+            _userService = userService;
         }
         public async Task SendMessage(string fromUserId, string toUserId, string message, bool? oneTime)
         {
@@ -35,6 +39,27 @@ namespace MongoDbTutorial.Hubs
                     _pushNotifier.SendPushNotification(sub, message);
                 }
             }
+        }
+
+        public async Task SendFollowRequest(string followerId, string followingId)
+        {
+           
+            await _userService.FollowUserAsync(followerId, followingId);
+            var pendingRequests = await _userService.GetPendingFollowRequests(followingId);
+            // Send to specific user
+            await Clients.User(followingId).SendAsync("ReceiveFollowRequest", pendingRequests);
+        }
+
+        public async Task SendFollowRequestNotification(string targetUserId)
+        {
+            var pendingRequests = await _userService.GetPendingFollowRequests(targetUserId);
+            await Clients.User(targetUserId).SendAsync("ReceiveFollowRequest", pendingRequests);
+        }
+
+        public async Task NotifyPendingFollowRequests(string userId)
+        {
+            var pendingRequests = await _userService.GetPendingFollowRequests(userId);
+            await Clients.User(userId).SendAsync("ReceiveFollowRequest", pendingRequests);
         }
 
         public override Task OnConnectedAsync()
